@@ -10,8 +10,16 @@ function LinkCard({ item, interacted, opening, onOpen }) {
       <div className="bar" />
       <div className="body">
         <div className="mid">
-          <div className="id">{CHANNEL_NAME[item.group] || "Rương"}</div>
-          <span className="chip box">Box: {item.box}</span>
+          <div className="title">
+            <div className="id">{CHANNEL_NAME[item.group] || "Rương"}</div>
+            {item.username && <span className="user">@{item.username}</span>}
+          </div>
+          <div className="chips">
+            <span className="chip box">Box: {item.box}</span>
+            {item.ratio && (
+              <span className="chip ratio">Ratio: {item.ratio}</span>
+            )}
+          </div>
           {item.span && <span className="chip time">Time: {item.span}</span>}
         </div>
         <div className="actions">

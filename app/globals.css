@@ -21,7 +21,12 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--white);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 /* thanh nhập device ID */
@@ -273,4 +278,32 @@ body {
   border-radius: 12px;
   white-space: pre-wrap;
   word-break: break-all;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ratio {
+  color: var(--red);
+  border-color: rgb(255 59 78 / 0.45);
+  background: rgb(255 59 78 / 0.12);
+}
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+.title .id {
+  flex: none;
+}
+.user {
+  min-width: 0;
+  font-size: 13px;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
