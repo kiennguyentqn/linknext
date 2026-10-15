@@ -356,3 +356,37 @@ body {
 #del-ntfy:active {
   transform: scale(0.97);
 }
+
+/* thanh thời gian dưới mỗi thẻ: đầy -> cạn khi hết giờ (xanh -> cam -> đỏ) */
+.card {
+  position: relative;
+}
+.countdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgb(255 255 255 / 0.06);
+}
+.countdown i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  animation-name: shrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes shrink {
+  from {
+    width: 100%;
+    background: var(--cyan);
+  }
+  70% {
+    background: var(--orange);
+  }
+  to {
+    width: 0%;
+    background: var(--red);
+  }
+}
