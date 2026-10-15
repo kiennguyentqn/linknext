@@ -307,3 +307,52 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* hàng nhập key ntfy */
+#ntfyForm {
+  margin-top: 8px !important;
+}
+#ntfykey {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--white);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  outline: none;
+}
+#ntfykey::placeholder {
+  color: var(--dim);
+}
+#ntfykey:focus {
+  border-color: var(--cyan);
+}
+#save-ntfy {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--g1), var(--g2));
+}
+#del-ntfy {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--btn);
+  border: 0;
+  border-radius: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+#save-ntfy:active,
+#del-ntfy:active {
+  transform: scale(0.97);
+}

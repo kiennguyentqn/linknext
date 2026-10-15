@@ -5,6 +5,12 @@ import LinkCard from "../components/LinkCard";
 import { parseLinks } from "../lib/links";
 import { secureFetch } from "../lib/secureApi";
 import { isGenuineMobile } from "../lib/device";
+import {
+  NTFY_KEY_STORAGE,
+  isValidTopic,
+  readNtfyKey,
+  sendNtfy,
+} from "../lib/ntfy";
 import { computeRequestSig, decryptLinkPayload } from "../lib/linkCrypto";
 import {
   CHANNELS,
@@ -22,6 +28,8 @@ const TABS = [{ id: "all", name: "Tất cả" }, ...CHANNELS];
 const VALID_TABS = new Set(TABS.map((t) => t.id));
 
 export default function Page() {
+  const [ntfyInput, setNtfyInput] = useState("");
+  const [ntfyKey, setNtfyKey] = useState(""); // key ntfy đã lưu (rỗng = không gửi)
   const [deviceInput, setDeviceInput] = useState("");
   const [ratioInput, setRatioInput] = useState("");
   const [deviceId, setDeviceId] = useState("");
@@ -48,6 +56,9 @@ export default function Page() {
   // ---------- đọc localStorage sau khi mount ----------
   useEffect(() => {
     try {
+      const nk = readNtfyKey();
+      setNtfyKey(nk);
+      setNtfyInput(nk);
       const d = (localStorage.getItem(STORAGE_KEY) || "").trim();
       const r = parseFloat(localStorage.getItem(RATIO_KEY));
       const t = localStorage.getItem(TAB_KEY);
@@ -234,6 +245,31 @@ export default function Page() {
     setMinRatio(r);
   }
 
+  function onSaveNtfy(ev) {
+    ev.preventDefault();
+    const v = ntfyInput.trim();
+    if (!isValidTopic(v)) {
+      toast("Key không hợp lệ (chỉ chữ, số, - và _)");
+      return;
+    }
+    try {
+      localStorage.setItem(NTFY_KEY_STORAGE, v);
+      setNtfyKey(v);
+      toast("Đã lưu key");
+    } catch (e) {
+      toast("Không lưu được vào trình duyệt");
+    }
+  }
+
+  function onDeleteNtfy() {
+    try {
+      localStorage.removeItem(NTFY_KEY_STORAGE);
+    } catch (e) {}
+    setNtfyKey("");
+    setNtfyInput("");
+    toast("Đã xóa key");
+  }
+
   function markInteracted(key) {
     setInteracted((prev) => {
       const next = new Set(prev);
@@ -283,8 +319,13 @@ export default function Page() {
         const finalUrl =
           targetUrl || (data.redirect_token ? "/r/" + data.redirect_token : "");
 
+        // Mở link thì đồng thời gửi giờ kết thúc (vd "17:50:42") qua ntfy — chỉ khi đã lưu key
+        const it = items.find((i) => i.key === key);
+        const sent = finalUrl && it ? sendNtfy(deviceId, it.span) : null;
+
         if (DEBUG_LINK) {
           console.log("[link]", key, finalUrl);
+          console.log("[ntfy]", sent || "không gửi (chưa có key hoặc không có giờ kết thúc)");
           toast("Đã in link ra console");
         } else if (finalUrl) {
           window.location.href = finalUrl;
@@ -332,6 +373,26 @@ export default function Page() {
           <button id="save" type="submit">
             Lưu
           </button>
+        </form>
+        <form id="ntfyForm" autoComplete="off" onSubmit={onSaveNtfy}>
+          <input
+            id="ntfykey"
+            type="text"
+            placeholder="Key ntfy (quicktimer-...)"
+            spellCheck="false"
+            autoCapitalize="off"
+            autoCorrect="off"
+            value={ntfyInput}
+            onChange={(e) => setNtfyInput(e.target.value)}
+          />
+          <button id="save-ntfy" type="submit">
+            Lưu
+          </button>
+          {ntfyKey && (
+            <button id="del-ntfy" type="button" onClick={onDeleteNtfy}>
+              Xóa
+            </button>
+          )}
         </form>
         <div id="tabs" role="tablist">
           {TABS.map((t) => (
