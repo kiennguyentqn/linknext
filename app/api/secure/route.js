@@ -17,13 +17,27 @@ function bad(status = 400) {
   return NextResponse.json({ error: "bad request" }, { status, headers: NO_STORE });
 }
 
+// Mọi request tới backend đều giả lập trình duyệt Chrome trên Android (không dùng UA của máy tính).
+// Có thể đổi UA bằng biến môi trường ANDROID_UA.
+const ANDROID_UA =
+  process.env.ANDROID_UA ||
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36";
+
 function forwardHeaders(req) {
-  return {
-    "User-Agent": req.headers.get("user-agent") || "Mozilla/5.0",
-    "Accept-Language": req.headers.get("accept-language") || "",
-    "X-Forwarded-For": req.headers.get("x-forwarded-for") || "",
-    Accept: "application/json",
+  const headers = {
+    "User-Agent": ANDROID_UA,
+    Accept: "application/json, text/plain, */*",
+    "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Sec-CH-UA": '"Chromium";v="126", "Not.A/Brand";v="24", "Google Chrome";v="126"',
+    "Sec-CH-UA-Mobile": "?1",
+    "Sec-CH-UA-Platform": '"Android"',
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
   };
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) headers["X-Forwarded-For"] = xff; // giữ IP thật của người dùng
+  return headers;
 }
 
 export async function POST(req) {
