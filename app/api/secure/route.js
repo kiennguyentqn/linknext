@@ -9,12 +9,15 @@ const NO_STORE = { "Cache-Control": "no-store" };
 
 // Các action GET đơn giản
 const GET_ACTIONS = {
-  links: "/api/client/links",
+  links: "api/v2/feed/stream",
   "check-auth": "/api/check-auth",
 };
 
 function bad(status = 400) {
-  return NextResponse.json({ error: "bad request" }, { status, headers: NO_STORE });
+  return NextResponse.json(
+    { error: "bad request" },
+    { status, headers: NO_STORE },
+  );
 }
 
 // Mọi request tới backend đều giả lập trình duyệt Chrome trên Android (không dùng UA của máy tính).
@@ -28,7 +31,8 @@ function forwardHeaders(req) {
     "User-Agent": ANDROID_UA,
     Accept: "application/json, text/plain, */*",
     "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Sec-CH-UA": '"Chromium";v="126", "Not.A/Brand";v="24", "Google Chrome";v="126"',
+    "Sec-CH-UA":
+      '"Chromium";v="126", "Not.A/Brand";v="24", "Google Chrome";v="126"',
     "Sec-CH-UA-Mobile": "?1",
     "Sec-CH-UA-Platform": '"Android"',
     "Sec-Fetch-Site": "same-origin",
@@ -92,13 +96,21 @@ export async function POST(req) {
           Origin: BACKEND_URL,
           Referer: BACKEND_URL + "/",
         },
-        body: JSON.stringify({ device_id: deviceId, shop_id: shopId, ts: linkTs, sig }),
+        body: JSON.stringify({
+          device_id: deviceId,
+          shop_id: shopId,
+          ts: linkTs,
+          sig,
+        }),
         cache: "no-store",
         signal: AbortSignal.timeout(6000),
       });
     } else {
       res = await fetch(
-        BACKEND_URL + GET_ACTIONS[action] + "?device_id=" + encodeURIComponent(deviceId),
+        BACKEND_URL +
+          GET_ACTIONS[action] +
+          "?device_id=" +
+          encodeURIComponent(deviceId),
         {
           cache: "no-store",
           signal: AbortSignal.timeout(4000),
@@ -126,7 +138,8 @@ export async function POST(req) {
         error: data && data.error,
         head: data === null ? text.slice(0, 120) : undefined,
       });
-      if (data === null) data = { error: `Backend trả về ${res.status} (không phải JSON)` };
+      if (data === null)
+        data = { error: `Backend trả về ${res.status} (không phải JSON)` };
     }
     inner = { status: res.status, data };
   } catch (e) {
@@ -134,5 +147,8 @@ export async function POST(req) {
   }
 
   // Response cũng được mã hóa trước khi trả về trình duyệt
-  return NextResponse.json({ d: await encryptJSON(inner) }, { headers: NO_STORE });
+  return NextResponse.json(
+    { d: await encryptJSON(inner) },
+    { headers: NO_STORE },
+  );
 }
