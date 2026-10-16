@@ -78,6 +78,9 @@ export async function POST(req) {
       const url =
         `${BACKEND_URL}/api/v2/feed/stream` +
         `?device_id=${encodeURIComponent(deviceId)}&ts=${t}&sig=${s}`;
+      // console.log("[links] ts:", t);
+      // console.log("[links] sig:", s);
+      // console.log("[links] url:", url);
       res = await fetch(url, {
         cache: "no-store",
         signal: AbortSignal.timeout(4000),
@@ -113,7 +116,7 @@ export async function POST(req) {
           encodeURIComponent(deviceId),
         {
           cache: "no-store",
-          signal: AbortSignal.timeout(4000),
+          signal: AbortSignal.timeout(5000),
           headers: forwardHeaders(req),
         },
       );
@@ -144,8 +147,14 @@ export async function POST(req) {
     }
     inner = { status: res.status, data };
   } catch (e) {
+    console.error(`[secure:${action}] LỖI FETCH:`, {
+      name: e.name,
+      message: e.message,
+      cause: e.cause,
+    });
     inner = { status: 502, data: { error: "Upstream error" } };
   }
+  // console.log(`[secure:${action}]`, JSON.stringify(inner, null, 2));
 
   // Response cũng được mã hóa trước khi trả về trình duyệt
   return NextResponse.json(
