@@ -26,14 +26,6 @@ function forwardHeaders(req) {
   };
 }
 
-async function readJson(res) {
-  try {
-    return await res.json();
-  } catch (_) {
-    return null;
-  }
-}
-
 export async function POST(req) {
   let payload;
   try {
@@ -79,7 +71,13 @@ export async function POST(req) {
       // Chuyển nguyên body như trang chính: { device_id, shop_id, ts, sig } — client đã tự ký
       res = await fetch(BACKEND_URL + "/api/get-link", {
         method: "POST",
-        headers: { ...forwardHeaders(req), "Content-Type": "application/json" },
+        headers: {
+          ...forwardHeaders(req),
+          "Content-Type": "application/json",
+          // trang chính gọi cùng origin với backend, nên backend có thể kiểm tra Origin/Referer
+          Origin: BACKEND_URL,
+          Referer: BACKEND_URL + "/",
+        },
         body: JSON.stringify({ device_id: deviceId, shop_id: shopId, ts: linkTs, sig }),
         cache: "no-store",
         signal: AbortSignal.timeout(6000),
@@ -95,7 +93,28 @@ export async function POST(req) {
       );
     }
     // Giữ nguyên status + body của backend (get-link: url | payload+t | redirect_token | error)
-    inner = { status: res.status, data: await readJson(res) };
+    const text = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch (_) {}
+
+    if (
+      action === "get-link" &&
+      !(res.ok && data && (data.url || data.payload || data.redirect_token))
+    ) {
+      // Chỉ log cấu trúc, không log link — xem trong Logs của Vercel / pm2 logs
+      console.error("[get-link] thất bại", {
+        status: res.status,
+        contentType: res.headers.get("content-type"),
+        isJson: data !== null,
+        keys: data && typeof data === "object" ? Object.keys(data) : [],
+        error: data && data.error,
+        head: data === null ? text.slice(0, 120) : undefined,
+      });
+      if (data === null) data = { error: `Backend trả về ${res.status} (không phải JSON)` };
+    }
+    inner = { status: res.status, data };
   } catch (e) {
     inner = { status: 502, data: { error: "Upstream error" } };
   }

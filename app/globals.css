@@ -357,36 +357,15 @@ body {
   transform: scale(0.97);
 }
 
-/* thanh thời gian dưới mỗi thẻ: đầy -> cạn khi hết giờ (xanh -> cam -> đỏ) */
-.card {
-  position: relative;
+/* số giây còn lại của mỗi thẻ */
+.left {
+  color: var(--cyan);
+  border-color: rgb(34 229 229 / 0.45);
+  background: rgb(34 229 229 / 0.12);
+  font-variant-numeric: tabular-nums;
 }
-.countdown {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: rgb(255 255 255 / 0.06);
-}
-.countdown i {
-  display: block;
-  height: 100%;
-  width: 100%;
-  animation-name: shrink;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-@keyframes shrink {
-  from {
-    width: 100%;
-    background: var(--cyan);
-  }
-  70% {
-    background: var(--orange);
-  }
-  to {
-    width: 0%;
-    background: var(--red);
-  }
+.left.low {
+  color: var(--red);
+  border-color: rgb(255 59 78 / 0.45);
+  background: rgb(255 59 78 / 0.12);
 }

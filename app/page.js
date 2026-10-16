@@ -331,7 +331,11 @@ export default function Page() {
           window.location.href = finalUrl;
         }
       } else {
-        toast((data && data.error) || "Link không khả dụng hoặc hết hạn!");
+        if (DEBUG_LINK) console.log("[get-link] lỗi", status, data);
+        toast(
+          (data && data.error) ||
+            "Link không khả dụng hoặc hết hạn! (" + status + ")",
+        );
       }
     } catch (e) {
       toast("Lỗi kết nối máy chủ!");
